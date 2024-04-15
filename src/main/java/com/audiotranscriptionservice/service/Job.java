@@ -15,7 +15,7 @@ public class Job implements Serializable {
     private LocalDateTime creationTime;
 
     public enum Status {
-        PENDING, PROCESSING, COMPLETED, FAILED
+        PENDING, PROCESSING, COMPLETED, FAILED, CANCELLED
     };
 
     public Job(Long jobId, String userId, String status, LocalDateTime creationTime) {

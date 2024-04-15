@@ -14,7 +14,9 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.URI;
@@ -23,6 +25,7 @@ import java.net.http.HttpClient;
 import java.util.Objects;
 import java.util.logging.Logger;
 
+@Component
 public class ATSCoreService {
     // make a call to the mock ATS service
     // handle retries
@@ -33,6 +36,11 @@ public class ATSCoreService {
 
     // only for unit testing
     public ATSCoreService() {
+        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+        cm.setMaxTotal(200); // Increase max total connection to 200
+        cm.setDefaultMaxPerRoute(20); // Increase default max connection per route to 20
+        this.client = HttpClients.custom().setConnectionManager(cm).build();
+
     }
 
     // very basic no validations or response null check
@@ -53,7 +61,7 @@ public class ATSCoreService {
                 .build();
 
             HttpGet getRequest = new HttpGet(uri);
-            this.client = HttpClients.createDefault();
+
             CloseableHttpResponse response = client.execute(getRequest);
             if (response != null && response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 String responseBody = EntityUtils.toString(response.getEntity());
@@ -73,14 +81,16 @@ public class ATSCoreService {
             }
         } catch (final IOException | URISyntaxException e) {
             e.printStackTrace();
-        } finally {
+        }
+        return getTranscriptResponse;
+    }
+
+    public void shutDown() {
             try {
                 client.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-        return getTranscriptResponse;
     }
 
 //    @Nullable
