@@ -3,7 +3,6 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Objects;
 
 public class StorageUtil {
 
@@ -29,19 +28,8 @@ public class StorageUtil {
     }
 
     public static void saveJobStatus(Long jobId, String userId, String jobStatus) throws IOException {
-        File file = new File(STORAGE_DIR+"jobStatus.txt");
-        // Ensure the directories exist.
-        if (!file.getParentFile().exists()) {
-            file.getParentFile().mkdirs(); // Extra check- Create the directory or directories if they do not exist.
-        }
-        // Ensure the file itself exists.
-        if (!file.exists()) {
-            file.createNewFile(); // Create the file if it does not exist.
-        }
-        // Save the job status to the file.
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
-            oos.writeBytes(jobId + " " + userId + " " + jobStatus);
-        }
+        // save job status for each user separately for easier access later
+        Files.writeString(Paths.get(STORAGE_DIR + userId + "/"+"job-status.txt"),  jobId + " "+ jobStatus+ "\n", StandardOpenOption.APPEND, StandardOpenOption.CREATE);
     }
 
     public static Job loadJob(Long jobId, String userId) throws IOException, ClassNotFoundException {
@@ -63,6 +51,21 @@ public class StorageUtil {
             System.err.println("Class definition changed or not found: " + e.getMessage());
         }
         return null;
+    }
+
+    public static byte[] loadFile(String filePath) throws IOException {
+        if (filePath == null || filePath.isEmpty()) {
+            throw new IllegalArgumentException("UserId in Job found null or empty ");
+        }
+        File file = new File(STORAGE_DIR + filePath);
+        // Check if the file exists before trying to read it.
+        if (!file.exists()) {
+            throw new FileNotFoundException("File: " + filePath + " does not exist.");
+        }
+
+        // Attempt to read the string from the file.
+        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
+        return ois.readAllBytes();
     }
 
     public static String getFilePath(String fileName) {

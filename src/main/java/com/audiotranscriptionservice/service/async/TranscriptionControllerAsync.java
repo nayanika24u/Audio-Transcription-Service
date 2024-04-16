@@ -40,15 +40,15 @@ public class TranscriptionControllerAsync {
         }
     }
 
-//    @GetMapping("/transcript/search")
-//    public ResponseEntity<TranscriptResult[]> searchTranscripts(@RequestParam String jobStatus, @RequestParam String userId) {
-//        try {
-//            TranscriptResult[] results = transcriptionService.searchTranscripts(jobStatus, userId).get();  // Block and get the result
-//            return ResponseEntity.ok(results);
-//        } catch (InterruptedException e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-//        }
-//    }
+    @GetMapping("/transcript/search")
+    public ResponseEntity<TranscriptResult[]> searchTranscripts(@RequestParam String jobStatus, @RequestParam String userId) {
+        try {
+            TranscriptResult[] results = transcriptionService.searchTranscripts(jobStatus, userId).get();  // Block and get the result
+            return ResponseEntity.ok(results);
+        } catch (InterruptedException | ExecutionException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
     // cancel job endpoint to stop erroneous job triggers; update the job status to cancelled in the job's info file
     // edge case: may result in concurrent access by 2 threads updating the status in the file as the StorageUtil class
