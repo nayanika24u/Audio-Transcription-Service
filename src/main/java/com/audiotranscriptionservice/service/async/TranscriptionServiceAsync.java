@@ -164,6 +164,7 @@ public class TranscriptionServiceAsync {
             failedFuture.completeExceptionally(new IllegalArgumentException("UserId found null or empty. Cannot access job information for it."));
             return failedFuture;
         }
+        final String finalJobStatus = jobStatus.isEmpty()? Job.Status.COMPLETED.name() : jobStatus.toUpperCase();
         // check userToJobInfoMap first else load the file into this map
 
         return CompletableFuture.supplyAsync(() -> {
@@ -174,11 +175,12 @@ public class TranscriptionServiceAsync {
                 try {
                     populateUserToJobInfoMap(userId);
                 } catch (IOException e) {
+                    logger.info("Failed to populate the userToJobInfo in-memory map. ", e);
                     // best effort loading of file into application cache
                 }
             }
             completedJobIds = userToJobInfoMap.get(userId).entrySet().stream()
-                    .filter(e -> e.getValue().equals(Job.Status.COMPLETED.name()))
+                    .filter(e -> e.getValue().equals(finalJobStatus))
                     .map(Map.Entry::getKey)
                     .collect(Collectors.toList());
 

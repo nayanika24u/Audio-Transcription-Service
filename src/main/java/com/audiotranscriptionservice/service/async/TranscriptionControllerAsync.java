@@ -43,7 +43,7 @@ public class TranscriptionControllerAsync {
     @GetMapping("/transcript/search")
     public ResponseEntity<TranscriptResult[]> searchTranscripts(@RequestParam String jobStatus, @RequestParam String userId) {
         try {
-            TranscriptResult[] results = transcriptionService.searchTranscripts(jobStatus, userId).get();  // Block and get the result
+            TranscriptResult[] results = transcriptionService.searchTranscripts(userId, jobStatus).get();  // Block and get the result
             return ResponseEntity.ok(results);
         } catch (InterruptedException | ExecutionException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
